@@ -5,7 +5,7 @@
 /*|AES key needs to be the same on receiver side for descryption                |*/
 /*|Sender: ESP32 compatible (ESP32-WROOM-32, ESP32-S)                           |*/
 /*|Autor: Martin Chlebovec - Your-IoT (martinius96)                             |*/
-/*|ESP32 using RNG to generate IV each time before transmission                 |*/
+/*|ESP32 using RNG to generate IV each time before transmission & also data     |*/
 /*|Data are padded using PKCS#7 to 16 byte blocks                               |*/
 /*|Payload format: IV plaintext (16 bytes) + ciphertext (32 bytes), 48 in total |*/
 /*|E-mail: martinius96@gmail.com                                                |*/
