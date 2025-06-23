@@ -5,6 +5,7 @@ Compatible with ESP32 microcontrollers and LoRa modules (SX127X)
 # Hardware
 * Sender: Lolin32
 * Receiver: ESP32-C6 (XIAO)
+![image](https://github.com/user-attachments/assets/510878b8-b1d3-4297-a229-9c4a8b2db242)
 
 # AES key
 * Both devices has the same AES encryption / descryption 256-bit key
