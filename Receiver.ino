@@ -14,21 +14,23 @@
 #include <LoRa.h>
 #include "mbedtls/aes.h"
 
-#define LORA_SCK  19   // SCK - hodiny
-#define LORA_MISO 20   // MISO - prijem
-#define LORA_MOSI 18   // MOSI - odosielanie
+#define LORA_SCK  19
+#define LORA_MISO 20
+#define LORA_MOSI 18
 
 #define SS 21
 #define RST 0
 #define DI0 1
-SPIClass spiLoRa(FSPI); // Použi FSPI (alebo VSPI ak máš ESP32)
+SPIClass spiLoRa(FSPI);
 
+//Data structure
 struct DataPacket {
   double a;
   double b;
   uint8_t c;
 };
 
+//AES key used for encryption and decryption
 uint8_t key[32] = {
   0xa3, 0x7f, 0x19, 0x4d, 0x82, 0xe6, 0x3b, 0xc1,
   0x58, 0x92, 0x6a, 0x0e, 0xf3, 0xd4, 0xb7, 0x5c,
@@ -36,6 +38,7 @@ uint8_t key[32] = {
   0x26, 0x64, 0xbe, 0x11, 0x75, 0x90, 0xcb, 0x2f
 };
 
+// PKCS#7 unpadding
 int pkcs7_unpad(uint8_t* input, int input_len) {
   if (input_len == 0) return 0;
   int pad_len = input[input_len - 1];
@@ -57,13 +60,13 @@ void printHex(const uint8_t* data, int len) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Inicializujem LoRa prijímač...");
+  Serial.println("Init of LoRa Receiver...");
   spiLoRa.begin(LORA_SCK, LORA_MISO, LORA_MOSI, SS);
   LoRa.setSPI(spiLoRa);
   LoRa.setPins(SS, RST, DI0);
 
   if (!LoRa.begin(433800000)) {
-    Serial.println("Chyba pri inicializácii LoRa!");
+    Serial.println("Error during initialization of LoRa!");
     while (true);
   }
 
@@ -74,20 +77,20 @@ void setup() {
   LoRa.setSyncWord(0x15);
   LoRa.enableCrc();
 
-  Serial.println("LoRa inicializované. Čakám na pakety...");
+  Serial.println("LoRa initialized Waiting for packets...");
   LoRa.receive();
 }
 
 void loop() {
   int packetSize = LoRa.parsePacket();
   if (packetSize > 0) {
-    Serial.println("Prijatý packet!");
+    Serial.println("Packet received!");
 
     uint8_t buffer[80];
     int len = LoRa.readBytes(buffer, packetSize);
 
     if (len < 17) {
-      Serial.println("Packet príliš krátky.");
+      Serial.println("Packet is too short!");
       return;
     }
 
@@ -101,7 +104,7 @@ void loop() {
     printHex(encrypted, encrypted_len);
     uint8_t decrypted[64];
     uint8_t iv_copy[16];
-    memcpy(iv_copy, iv, 16); // CBC modifikácia IV počas procesu
+    memcpy(iv_copy, iv, 16);
 
     mbedtls_aes_context aes;
     mbedtls_aes_init(&aes);
@@ -111,7 +114,7 @@ void loop() {
 
     int unpadded_len = pkcs7_unpad(decrypted, encrypted_len);
     if (unpadded_len != sizeof(DataPacket)) {
-      Serial.println("Neočakávaná veľkosť po unpade.");
+      Serial.println("Size mismatch after unpadding");
       return;
     }
 
@@ -122,12 +125,14 @@ void loop() {
     float snr = LoRa.packetSnr();
     long freqErr = LoRa.packetFrequencyError();
 
-    Serial.printf("Prijaté dáta:\n");
+    Serial.printf("Received data - decrypted:\n");
     Serial.printf("a: %.6f\n", packet.a);
     Serial.printf("b: %.6f\n", packet.b);
     Serial.printf("c: %u\n", packet.c);
+/*   
     Serial.printf("RSSI: %d dBm\n", rssi);
     Serial.printf("SNR: %.2f dB\n", snr);
     Serial.printf("Freq Error: %ld Hz\n\n", freqErr);
-  }
+*/  
+}
 }
