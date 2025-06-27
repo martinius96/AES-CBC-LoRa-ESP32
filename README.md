@@ -2,6 +2,15 @@
 LoRa PPP communication with payload encryption using AES-CBC via API of mbedTLS
 Compatible with ESP32 microcontrollers and LoRa modules (SX127X). Arduino_LoRa library for PPP LoRa transmission
 
+# LoRa config
+* Freq: 433,800 MHz
+* Spreading Factor: 8
+* BW: 125 kHz
+* CR: 4/8
+* Preamble: 8 chars
+* Sync word: 0x15
+* CRC: ON
+
 # Hardware
 * Sender: Lolin32 (ESP32-WROOM-32)
 * Receiver: ESP32-C6 (XIAO), added example for ESP32-WROOM-32 based receiver too
